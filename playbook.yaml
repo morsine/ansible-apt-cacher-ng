@@ -1,0 +1,29 @@
+---
+- name: APT Cache server setup
+  hosts: cacher
+  vars_files:
+    - vars/common.yml
+  tasks:
+  - name: Updating repo
+    apt: update_cache=yes force_apt_get=yes cache_valid_time=3600
+  - name: Installing apt-cacher-ng
+    apt:
+      pkg:
+      - apt-cacher-ng
+  - name: Configuring apt-cacher-ng
+    blockinfile:
+      path: /etc/apt-cacher-ng/acng.conf
+      block: |
+        AdminAuth: {{admin_user}}:{{admin_pass}}
+        LocalDirs: acng-doc /usr/share/doc/apt-cacher-ng
+        CacheDir: {{cache_dir}}
+        ExThreshold: {{expiry_days}}
+        ExStartTradeOff: {{max_cache}}
+        Port: {{running_port}}
+      create: yes
+    register: edit_results
+  - name: Restarting service
+    ansible.builtin.service:
+      name: apt-cacher-ng
+      state: restarted
+    when: edit_results.changed

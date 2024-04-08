@@ -1,0 +1,6 @@
+admin_user: admin
+admin_pass: password123
+cache_dir: /var/cache/apt-cacher-ng
+expiry_days: 30
+max_cache: 30gb
+running_port: 8081
